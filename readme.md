@@ -54,57 +54,58 @@ http://127.0.0.1:8000/api
 }
 ```
 
-**API ENDPOINTS**
+## API ENDPOINTS
 
 ### SUPPLIER
 
-- **Get All Suppliers**:
+- **Get All Suppliers**
   `GET /suppliers`
-- **Create Supplier**:
+- **Create Supplier**
   `POST /suppliers`
-  **Body**:
+- **Body**:
     ```json
     {
         "name": "Supplier A"
     }
     ```
 - **Get Supplier Detail**:
-  `GET /suppliers/{id}`
+    - `GET /suppliers/{id}`
 - **Update Supplier**:
-  `PUT /suppliers/{id}`
-  **Body**:
-    ```json
-    {
-        "name": "Updated Supplier"
-    }
-    ```
+    - `PUT /suppliers/{id}`
+- **Body**:
+    ````json
+        {
+            "name": "Updated Supplier"
+        }
+        ```
+    ````
 - **Delete Supplier**:
     - `DELETE /suppliers/{id}`
 
 ### LAYUPS (Nested under Supplier)
 
 - **Get Layups**:
-  `GET /suppliers/{supplier_id}/layups`
+    - `GET /suppliers/{supplier_id}/layups`
 - **Create Layup**:
-  `POST /suppliers/{supplier_id}/layups`
-  **Body**:
+    - `POST /suppliers/{supplier_id}/layups`
+- **Body**:
     ```json
     {
         "name": "Layup A"
     }
     ```
 - **Update Layup**:
-  `PUT /suppliers/{supplier_id}/layups/{id}`
+    - `PUT /suppliers/{supplier_id}/layups/{id}`
 - **Delete Layup**:
-  `DELETE /suppliers/{supplier_id}/layups/{id}`
+    - `DELETE /suppliers/{supplier_id}/layups/{id}`
 
 ### LAYERS (Nested under Layup)
 
 - **Get Layers**:
-  `GET /layups/{layup_id}/layers`
+    - `GET /layups/{layup_id}/layers`
 - **Create Layers**:
-  `POST /layups/{layup_id}/layers`
-  **Body:**:
+    - `POST /layups/{layup_id}/layers`
+- **Body:**:
     ```json
     {
         "layer_order": 1,
@@ -114,17 +115,17 @@ http://127.0.0.1:8000/api
     }
     ```
 - **Update Layers**:
-  `PUT /layups/{layup_id}/layers/{id}`
+    - `PUT /layups/{layup_id}/layers/{id}`
 
 - **Delete Layer**:
-  `DELETE /layups/{layup_id}/layers/{id}`
+    - `DELETE /layups/{layup_id}/layers/{id}`
 
 ---
 
 ### EXPORT SUPPLIER
 
 - **Export Full Structure**:
-  `GET /suppliers/{id}/export`
+    - `GET /suppliers/{id}/export`
 - **Response**:
     ```json
     {
@@ -150,7 +151,7 @@ http://127.0.0.1:8000/api
 ### IMPORT SUPPLIER
 
 - **Import Data**:
-  `POST /suppliers/{id}/import?strategy=overwrite`
+    - `POST /suppliers/{id}/import?strategy=overwrite`
 
 - **Body**:
 
@@ -247,6 +248,7 @@ Recommended:
 ## NOTES
 
 This API is designed for:
+
 - scalable hierarchical data
 - conflict-aware import system
 - clean and maintainable Laravel architecture
