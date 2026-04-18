@@ -1,155 +1,252 @@
-# Feature Test Assignment
+# CLT Management API Documentation
 
-## 1. Instructions
+## Overview
 
-- Clone or fork this repository.
-- Create a new branch: `{user}-assignment`.
-- Invite **@ikhsan017** and **@dhiaaziz** as collaborators.
-- Follow the setup instructions provided in the repository before running the project.
+This project is a Laravel-based REST API for managing hierarchical data structure:
 
-## 2. Feature Requirements
+- Supplier → Layups → Layers
 
-### Core Features (Main Criteria)
+It also supports:
 
-- [ ] CRUD Suppliers
-- [ ] CRUD CLT Layups (nested under Supplier)
-- [ ] CRUD CLT Layers (nested under Layup)
-
-The structure should properly reflect the hierarchy:
-Supplier → Layups → Layers
-
-### Data Model (ERD)
-
-Below is the Entity Relationship Diagram (ERD) representing the data structure:
-
-![ERD](./erd-new.png)
-
-### Import / Export (Main Criteria)
-
-- [ ] **Export by Supplier**
-    - Must include: Supplier + all related Layups + all related Layers
-
-- [ ] **Import by Supplier**
-    - Must create and/or update Layups and Layers under the specified supplier
-
-Format is flexible (JSON / CSV / Excel, etc.). JSON format is completely acceptable.
-
-## 3. Feature: Conflict Resolution (Bonus – Important)
-
-During import, conflicts may occur when incoming data differs from existing records.
-
-### Conflict Detection Rules
-
-#### 1. Layup-Level Conflict
-
-If a layup with the same `name` already exists under the same supplier:
-
-- Treat it as the same layup candidate.
-- Do **not** automatically create a new layup.
-
-#### 2. Layer-Level Conflict
-
-If:
-
-- A layer with the same `layer_order` exists within that layup,
-- **AND** one or more fields differ (`thickness`, `width`, `angle`),
-
-→ This must be treated as a conflict.
+- Import / Export per Supplier
+- Conflict detection & resolution strategies
+- Clean architecture (Service + Repository pattern)
 
 ---
 
-### Required Conflict Handling
+## Base URL
 
-You must implement a clearly defined conflict resolution strategy.
-
-At minimum, support **one** of the following:
-
-- **Overwrite Existing**  
-  (Incoming data replaces current data)
-
-- **Skip Conflict**  
-  (Keep current data, ignore incoming change)
-
-- **Duplicate Layup**  
-  (Create a new layup with a suffix such as `name (imported)`)
-
-- **Reject Entire Import**  
-  (Abort and return a detailed conflict report)
+http://127.0.0.1:8000/api
 
 ---
 
-### Advanced Conflict Resolution (UI-Based – Bonus)
+## Data Structure
 
-For additional bonus points, implement a **manual conflict resolution interface** similar to GitHub merge conflict resolution.
+### Supplier
 
-Expected behavior:
+```json
+{
+    "id": 1,
+    "name": "Supplier A"
+}
+```
 
-- Display **Existing Version (Current Data)** and  
-  **Incoming Version (Imported Data)** side-by-side
-- Highlight field-level differences
-- Allow the user to choose:
-    - ✅ Keep Existing
-    - ✅ Accept Incoming
-- Support resolving conflicts one-by-one
-- Provide navigation (e.g., “1 of 3 discrepancies”)
+### Layup
 
-This may be implemented as:
+```json
+{
+    "id": 1,
+    "supplier_id": 1,
+    "name": "Layup A"
+}
+```
 
-- A modal, or
-- A dedicated conflict resolution page.
+### Layer
 
-## 4. Design Reference
+```json
+{
+    "id": 1,
+    "layup_id": 1,
+    "layer_order": 1,
+    "thickness": 10.5,
+    "width": 100,
+    "angle": 45
+}
+```
 
-A design reference is available in Figma:
+**API ENDPOINTS**
 
-[Figma Design File](https://www.figma.com/design/odWJ887r00aslmSFPIHMCx/SPEC-Toolbox---Feature-Test?node-id=11001-35&t=XUggOaUUi9p8jGFG-1)
+### SUPPLIER
 
-> The design is for reference only. Exact visual matching is not required.
+- **Get All Suppliers**:
+  `GET /suppliers`
+- **Create Supplier**:
+  `POST /suppliers`
+  **Body**:
+    ```json
+    {
+        "name": "Supplier A"
+    }
+    ```
+- **Get Supplier Detail**:
+  `GET /suppliers/{id}`
+- **Update Supplier**:
+  `PUT /suppliers/{id}`
+  **Body**:
+    ```json
+    {
+        "name": "Updated Supplier"
+    }
+    ```
+- **Delete Supplier**:
+    - `DELETE /suppliers/{id}`
 
-## 5. Evaluation Criteria
+### LAYUPS (Nested under Supplier)
 
-### Main Evaluation
+- **Get Layups**:
+  `GET /suppliers/{supplier_id}/layups`
+- **Create Layup**:
+  `POST /suppliers/{supplier_id}/layups`
+  **Body**:
+    ```json
+    {
+        "name": "Layup A"
+    }
+    ```
+- **Update Layup**:
+  `PUT /suppliers/{supplier_id}/layups/{id}`
+- **Delete Layup**:
+  `DELETE /suppliers/{supplier_id}/layups/{id}`
 
-- Correct implementation of the required features
+### LAYERS (Nested under Layup)
 
-### Bonus Evaluation
+- **Get Layers**:
+  `GET /layups/{layup_id}/layers`
+- **Create Layers**:
+  `POST /layups/{layup_id}/layers`
+  **Body:**:
+    ```json
+    {
+        "layer_order": 1,
+        "thickness": 10.5,
+        "width": 100,
+        "angle": 45
+    }
+    ```
+- **Update Layers**:
+  `PUT /layups/{layup_id}/layers/{id}`
 
-**Architecture & Design Patterns**
+- **Delete Layer**:
+  `DELETE /layups/{layup_id}/layers/{id}`
 
-- Use Repository and/or Service pattern
-- Bind interfaces via a Service Provider
+---
 
-**Laravel Best Practices**
+### EXPORT SUPPLIER
 
-- Form Request validation
-- Policies or Gates for authorization
-- Proper use of Route Model Binding
-- Clean, maintainable code following Laravel conventions
+- **Export Full Structure**:
+  `GET /suppliers/{id}/export`
+- **Response**:
+    ```json
+    {
+        "id": 1,
+        "name": "Supplier A",
+        "layups": [
+            {
+                "id": 1,
+                "name": "Layup A",
+                "layers": [
+                    {
+                        "layer_order": 1,
+                        "thickness": 10,
+                        "width": 100,
+                        "angle": 45
+                    }
+                ]
+            }
+        ]
+    }
+    ```
 
-**Automated Testing**
+### IMPORT SUPPLIER
 
-- Unit tests (validation, services, repositories)
-- Feature tests (CRUD and import/export flows)
+- **Import Data**:
+  `POST /suppliers/{id}/import?strategy=overwrite`
 
-**Additional Improvements**
+- **Body**:
 
-- Any meaningful enhancements will be considered positively
+    ```json
+    {
+        "layups": [
+            {
+                "name": "Layup A",
+                "layers": [
+                    {
+                        "layer_order": 1,
+                        "thickness": 12,
+                        "width": 100,
+                        "angle": 45
+                    }
+                ]
+            }
+        ]
+    }
+    ```
 
-## 6. Submission
+- **IMPORT STRATEGY**:
+  | Strategy | Description |
+  |------------|------------------------------------|
+  | overwrite | Replace existing data |
+  | skip | Keep existing data |
+  | duplicate | Create new layup with suffix |
+  | reject | Abort import if conflict exists |
 
-The deadline will be provided via email.  
-Please ensure submission within the specified timeframe.
+#### CONFLICT HANDLING RULES
 
+- **Layup Conflict**:
+    - Same name under same supplier
+    - Treated as same entity (no duplicate)
 
-## 7. Demo
+- **Layer Conflict**:
+- Conflict occurs if:
+    - Same `layer_order`
+    - AND any field differs:
+        - `thickness`
+        - `width`
+        - `angle`
 
-Include one of the following with your submission:
+#### REJECT RESPONSE
 
-- A demo video (recommended), or
-- A live project link
+    ```json
+    {
+        "status": "failed",
+        "message": "Conflict detected",
+        "conflicts": [
+            {
+                "layup": "Layup A",
+                "layer_order": 1,
+                "existing": {
+                    "thickness": 10
+                },
+                "incoming": {
+                    "thickness": 12
+                }
+            }
+        ]
+    }
+    ```
 
-Ensure the demo clearly showcases:
+## HTTP STATUS CODES
 
-- CRUD functionality
-- Import / Export feature
-- Conflict resolution behavior
+| Code | Meaning          |
+| ---- | ---------------- |
+| 200  | Success          |
+| 201  | Created          |
+| 404  | Not Found        |
+| 409  | Conflict         |
+| 422  | Validation Error |
+| 500  | Server Error     |
+
+## ARCHITECTURE
+
+This project uses:
+
+- Service Layer Pattern
+- Repository Pattern
+- Interface Binding
+- Form Request Validation
+- Route Model Binding
+
+## TESTING TOOLS
+
+Recommended:
+
+- Postman
+- Laravel Feature Test
+- Thunder Client
+
+## NOTES
+
+This API is designed for:
+- scalable hierarchical data
+- conflict-aware import system
+- clean and maintainable Laravel architecture
